@@ -90,6 +90,12 @@ def event_list(request, page=0, order="-date_published", format=None, ):
         paginator = Paginator(serializer.data, 10)
         return Response(paginator.page(page))
 
+    elif request.method == 'VIEW':
+        event = Event.objects.all().order_by(order)
+        serializer = PrivateEventSerializer(event, many=True)
+        paginator = Paginator(serializer.data, 10)
+        return Response(paginator.page_range)
+
     elif request.method == 'POST':
         serializer = EventSerializer(data=request.data)
         if serializer.is_valid():
