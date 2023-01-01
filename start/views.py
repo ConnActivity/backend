@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -17,9 +18,6 @@ from start.serializers import UserSerializer, PrivateEventSerializer, PrivateMem
 # Create your views here.
 def index(request):
     return HttpResponse("Henlo world. You're at the start index.")
-
-
-# TODO: Pagination einbauen
 
 
 def get_user_serializer_class(userid, user):
@@ -83,13 +81,14 @@ def get_event_serializer_class(userid, event):
 
 
 @api_view(['GET', 'POST'])
-def event_list(request, order="-date_published", format=None, ):
+def event_list(request, page=0, order="-date_published", format=None, ):
     """List all events or create new"""
     userid = user_auth(request)
     if request.method == 'GET':
         event = Event.objects.all().order_by(order)
         serializer = PrivateEventSerializer(event, many=True)
-        return Response(serializer.data)
+        paginator = Paginator(serializer.data, 10)
+        return Response(paginator.page(page))
 
     elif request.method == 'POST':
         serializer = EventSerializer(data=request.data)
@@ -148,7 +147,7 @@ def leave_event(request, pk):
     userid = user_auth(request)
     try:
         # The Owner can't leave the event
-        if (Event.objects.get(pk=pk).creator_id == userid):
+        if Event.objects.get(pk=pk).creator_id == userid:
             return Response(status=status.HTTP_403_FORBIDDEN)
         event = Event.objects.get(pk=pk)
         event.member_list.remove(userid)
@@ -184,7 +183,7 @@ def approval_member_wait_list(request, pk, member):
 
 @api_view(['GET', 'POST'])
 def tags(request):
-    user_auth(request)
+    userid = user_auth(request)
 
     if request.method == 'GET':
         tag = Tag.objects.all()
@@ -200,7 +199,7 @@ def tags(request):
 
 @api_view(['DELETE'])
 def tags_delete(request, pk):
-    user_auth(request)
+    userid = user_auth(request)
     if userid == 'qZeeNMtw55d0rkkgg87ImP7EhTV2':
         try:
             tag = Tag.objects.get(pk=pk)
