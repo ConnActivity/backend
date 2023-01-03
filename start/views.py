@@ -89,7 +89,8 @@ def event_list(request, order="-date_published", format=None):
         event = Event.objects.all().order_by(order)
         serializer = PrivateEventSerializer(event, many=True)
         paginator = Paginator(serializer.data, 10)
-        return Response(paginator.page(page).object_list)
+        headers = {"Link": paginator.get_link_header(request)}
+        return Response(paginator.page(page).object_list, headers)
 
     elif request.method == 'POST':
         serializer = EventSerializer(data=request.data)
@@ -97,7 +98,7 @@ def event_list(request, order="-date_published", format=None):
             if userid == request.data.get('creator') and userid == request.data.get('member_list'):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
