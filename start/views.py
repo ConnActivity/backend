@@ -88,7 +88,7 @@ def event_list(request, page=1, order="-date_published", format=None, ):
         event = Event.objects.all().order_by(order)
         serializer = PrivateEventSerializer(event, many=True)
         paginator = Paginator(serializer.data, 10)
-        return Response(PrivateEventSerializer(paginator.page(page).object_list, many=True).data)
+        return Response(paginator.page(page).object_list)
 
     elif request.method == 'POST':
         serializer = EventSerializer(data=request.data)
