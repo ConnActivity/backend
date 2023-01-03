@@ -94,10 +94,10 @@ def event_list(request, order="-date_published", format=None):
 
     elif request.method == 'POST':
         serializer = EventSerializer(data=request.data)
-        if serializer.is_valid():
-            if userid == request.data.get('creator') and userid == request.data.get('member_list'):
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if serializer.is_valid() and userid == request.data.get('creator') and userid == request.data.get(
+                'member_list')[0]:
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
