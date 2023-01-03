@@ -32,7 +32,7 @@ def user_list(request, order="username", format=None):
     """
     Create a new user or get user list
     """
-    userid = user_auth(request)
+    userid = user_auth(request.COOKIES.get("user_token"))
     if request.method == 'GET':
         return Response(status=status.HTTP_418_IM_A_TEAPOT)
 
@@ -50,7 +50,7 @@ def user_detail(request, pk, format=None):
     """
     Retrieve, update or delete a code snippet.
     """
-    userid = user_auth(request)
+    userid = user_auth(request.COOKIES.get("user_token"))
     try:
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
@@ -83,18 +83,12 @@ def get_event_serializer_class(userid, event):
 @api_view(['GET', 'POST'])
 def event_list(request, page=0, order="-date_published", format=None, ):
     """List all events or create new"""
-    userid = user_auth(request)
+    userid = user_auth(request.COOKIES.get("user_token"))
     if request.method == 'GET':
         event = Event.objects.all().order_by(order)
         serializer = PrivateEventSerializer(event, many=True)
         paginator = Paginator(serializer.data, 10)
-        return Response(paginator.page(page))
-
-    elif request.method == 'VIEW':
-        event = Event.objects.all().order_by(order)
-        serializer = PrivateEventSerializer(event, many=True)
-        paginator = Paginator(serializer.data, 10)
-        return Response(paginator.page_range)
+        return Response(paginator.page(page), headers=paginator.page_range)
 
     elif request.method == 'POST':
         serializer = EventSerializer(data=request.data)
@@ -108,7 +102,7 @@ def event_list(request, page=0, order="-date_published", format=None, ):
 @api_view(['GET', 'PUT', 'DELETE'])
 def event_detail(request, pk, format=None):
     """Retrieve, update or delete a code snippet"""
-    userid = user_auth(request)
+    userid = user_auth(request.COOKIES.get("user_token"))
 
     try:
         event = Event.objects.get(pk=pk)
@@ -133,7 +127,7 @@ def event_detail(request, pk, format=None):
 
 @api_view(['PUT'])
 def join_event(request, pk):
-    userid = user_auth(request)
+    userid = user_auth(request.COOKIES.get("user_token"))
     try:
         event = Event.objects.get(pk=pk)
     except Event.DoesNotExist:
@@ -150,7 +144,7 @@ def join_event(request, pk):
 
 @api_view(['PUT'])
 def leave_event(request, pk):
-    userid = user_auth(request)
+    userid = user_auth(request.COOKIES.get("user_token"))
     try:
         # The Owner can't leave the event
         if Event.objects.get(pk=pk).creator_id == userid:
@@ -165,7 +159,7 @@ def leave_event(request, pk):
 
 @api_view(['PUT'])
 def approval_member_wait_list(request, pk, member):
-    userid = user_auth(request)
+    userid = user_auth(request.COOKIES.get("user_token"))
     try:
         event = Event.objects.get(pk=pk)
     except Event.DoesNotExist:
@@ -189,7 +183,7 @@ def approval_member_wait_list(request, pk, member):
 
 @api_view(['GET', 'POST'])
 def tags(request):
-    userid = user_auth(request)
+    userid = user_auth(request.COOKIES.get("user_token"))
 
     if request.method == 'GET':
         tag = Tag.objects.all()
@@ -205,7 +199,7 @@ def tags(request):
 
 @api_view(['DELETE'])
 def tags_delete(request, pk):
-    userid = user_auth(request)
+    userid = user_auth(request.COOKIES.get("user_token"))
     if userid == 'qZeeNMtw55d0rkkgg87ImP7EhTV2':
         try:
             tag = Tag.objects.get(pk=pk)
