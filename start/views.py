@@ -215,7 +215,7 @@ def tags_delete(request, pk):
 
 @api_view(['GET'])
 def user_list_events(request, pk):
-    user_auth(request)
+    user_auth(request.COOKIES.get("user_token"))
     try:
         events = Event.objects.filter(member_list=pk)
         serializer = PrivateEventSerializer(events, many=True)
@@ -226,7 +226,7 @@ def user_list_events(request, pk):
 
 @api_view(['GET'])
 def user_list_events_wait_list(request, pk):
-    user_auth(request)
+    user_auth(request.COOKIES.get("user_token"))
     try:
         events = Event.objects.filter(member_wait_list=pk)
         serializer = PrivateEventSerializer(events, many=True)
