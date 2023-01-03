@@ -81,7 +81,7 @@ def get_event_serializer_class(userid, event):
 
 
 @api_view(['GET', 'POST'])
-def event_list(request, page=0, order="-date_published", format=None, ):
+def event_list(request, page=1, order="-date_published", format=None, ):
     """List all events or create new"""
     userid = user_auth(request.COOKIES.get("user_token"))
     if request.method == 'GET':
