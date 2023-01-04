@@ -81,10 +81,11 @@ def get_event_serializer_class(userid, event):
 
 
 @api_view(['GET', 'POST'])
-def event_list(request, order="-date_published", format=None):
+def event_list(request, format=None):
     """List all events or create new"""
     userid = user_auth(request.COOKIES.get("user_token"))
     page = request.GET.get("page", 1)
+    order = request.GET.get("order", "-date_published")
     if request.method == 'GET':
         event = Event.objects.all().order_by(order)
         serializer = PrivateEventSerializer(event, many=True)
@@ -95,7 +96,7 @@ def event_list(request, order="-date_published", format=None):
     elif request.method == 'POST':
         serializer = EventSerializer(data=request.data)
         if serializer.is_valid() and userid == request.data.get('creator') and userid == request.data.get(
-                'member_list')[0]:
+                'member_list'):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
