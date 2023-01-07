@@ -154,11 +154,9 @@ def leave_event(request, pk):
             return Response(status=status.HTTP_403_FORBIDDEN)
         event = Event.objects.get(pk=pk)
         event.member_list.remove(userid)
+        return Response(status=status.HTTP_200_OK)
     except Event.DoesNotExist:
         return Response(status.HTTP_404_NOT_FOUND)
-
-    return Response(status=status.HTTP_200_OK)
-
 
 @api_view(['PUT'])
 def approval_member_wait_list(request, pk, member):
