@@ -5,7 +5,7 @@ from firebase_admin import auth
 def create_demo_token(uid):
     if not firebase_admin._apps:
         creds = firebase_admin.credentials.Certificate("./firebase_cred.json")
-        firebase_admin.initialize_app(creds)
+        fb_instance = firebase_admin.initialize_app(creds)
     return auth.create_custom_token(uid)
 
 

@@ -35,7 +35,11 @@ def user_list(request, order="username", format=None):
     """
     Create a new user or get user list
     """
-    userid = user_auth(request)
+    try:
+        userid = user_auth(request.COOKIES.get('user_token'))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    # TODO: GET eigentlich unnötig/Eventuell umbauen zu Freundesliste
     if request.method == 'GET':
         return Response(status=status.HTTP_418_IM_A_TEAPOT)
 
@@ -53,7 +57,10 @@ def user_detail(request, pk, format=None):
     """
     Retrieve, update or delete a code snippet.
     """
-    userid = user_auth(request)
+    try:
+        userid = user_auth(request.COOKIES.get("user_token"))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
@@ -86,8 +93,10 @@ def get_event_serializer_class(userid, event):
 @api_view(['GET', 'POST'])
 def event_list(request, order="-date_published", format=None):
     """List all events or create new"""
-    userid = user_auth(request.COOKIES.get("user_token"))
-    page = request.GET.get("page", 1)
+    try:
+        userid = user_auth(request.COOKIES.get("user_token"))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'GET':
         event = Event.objects.all().order_by(order)
         serializer = PrivateEventSerializer(event, many=True)
@@ -107,7 +116,10 @@ def event_list(request, order="-date_published", format=None):
 @api_view(['GET', 'PUT', 'DELETE'])
 def event_detail(request, pk, format=None):
     """Retrieve, update or delete a code snippet"""
-    userid = user_auth(request)
+    try:
+        userid = user_auth(request.COOKIES.get("user_token"))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     try:
         event = Event.objects.get(pk=pk)
@@ -132,7 +144,10 @@ def event_detail(request, pk, format=None):
 
 @api_view(['PUT'])
 def join_event(request, pk):
-    userid = user_auth(request)
+    try:
+        userid = user_auth(request.COOKIES.get("user_token"))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         event = Event.objects.get(pk=pk)
     except Event.DoesNotExist:
@@ -149,7 +164,10 @@ def join_event(request, pk):
 
 @api_view(['PUT'])
 def leave_event(request, pk):
-    userid = user_auth(request)
+    try:
+        userid = user_auth(request.COOKIES.get('user_token'))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         # The Owner can't leave the event
         if (Event.objects.get(pk=pk).creator_id == userid):
@@ -164,7 +182,10 @@ def leave_event(request, pk):
 
 @api_view(['PUT'])
 def approval_member_wait_list(request, pk, member):
-    userid = user_auth(request)
+    try:
+        userid = user_auth(request.COOKIES.get('user_token'))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         event = Event.objects.get(pk=pk)
     except Event.DoesNotExist:
@@ -188,7 +209,10 @@ def approval_member_wait_list(request, pk, member):
 
 @api_view(['GET', 'POST'])
 def tags(request):
-    user_auth(request)
+    try:
+        userid = user_auth(request.COOKIES.get('user_token'))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     if request.method == 'GET':
         tag = Tag.objects.all()
@@ -204,7 +228,10 @@ def tags(request):
 
 @api_view(['DELETE'])
 def tags_delete(request, pk):
-    user_auth(request)
+    try:
+        userid = user_auth(request.COOKIES.get('user_token'))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     if userid == 'qZeeNMtw55d0rkkgg87ImP7EhTV2':
         try:
             tag = Tag.objects.get(pk=pk)
@@ -220,7 +247,10 @@ def tags_delete(request, pk):
 
 @api_view(['GET'])
 def user_list_events(request, pk):
-    user_auth(request)
+    try:
+        userid = user_auth(request.COOKIES.get('user_token'))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         events = Event.objects.filter(member_list=pk)
         serializer = PrivateEventSerializer(events, many=True)
@@ -231,7 +261,10 @@ def user_list_events(request, pk):
 
 @api_view(['GET'])
 def user_list_events_wait_list(request, pk):
-    user_auth(request)
+    try:
+        userid = user_auth(request.COOKIES.get('user_token'))
+    except:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         events = Event.objects.filter(member_wait_list=pk)
         serializer = PrivateEventSerializer(events, many=True)
