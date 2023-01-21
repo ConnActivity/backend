@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -83,13 +84,16 @@ def get_event_serializer_class(userid, event):
 
 
 @api_view(['GET', 'POST'])
-def event_list(request, order="-date_published", format=None, ):
+def event_list(request, order="-date_published", format=None):
     """List all events or create new"""
-    userid = user_auth(request)
+    userid = user_auth(request.COOKIES.get("user_token"))
+    page = request.GET.get("page", 1)
     if request.method == 'GET':
         event = Event.objects.all().order_by(order)
         serializer = PrivateEventSerializer(event, many=True)
-        return Response(serializer.data)
+        paginator = Paginator(serializer.data, 10)
+        headers = {"Link": paginator.num_pages}
+        return Response(paginator.page(page).object_list, headers=headers)
 
     elif request.method == 'POST':
         serializer = EventSerializer(data=request.data)
