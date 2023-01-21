@@ -20,9 +20,6 @@ def index(request):
     return HttpResponse("Henlo world. You're at the start index.")
 
 
-# TODO: Pagination einbauen
-
-
 def get_user_serializer_class(userid, user):
     if userid == user.user_id:
         return UserSerializer(user)
@@ -108,11 +105,11 @@ def event_list(request, order="-date_published", format=None):
 
     elif request.method == 'POST':
         serializer = EventSerializer(data=request.data)
-        if serializer.is_valid():
-            if userid == request.data.get('creator') and userid == request.data.get('member_list'):
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid() and userid == request.data.get('creator') and userid == request.data.get(
+                'member_list'):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -172,15 +169,13 @@ def leave_event(request, pk):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
     try:
         # The Owner can't leave the event
-        if (Event.objects.get(pk=pk).creator_id == userid):
+        if Event.objects.get(pk=pk).creator_id == userid:
             return Response(status=status.HTTP_403_FORBIDDEN)
         event = Event.objects.get(pk=pk)
         event.member_list.remove(userid)
+        return Response(status=status.HTTP_200_OK)
     except Event.DoesNotExist:
         return Response(status.HTTP_404_NOT_FOUND)
-
-    return Response(status=status.HTTP_200_OK)
-
 
 @api_view(['PUT'])
 def approval_member_wait_list(request, pk, member):
