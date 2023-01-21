@@ -97,6 +97,8 @@ def event_list(request, order="-date_published", format=None):
         userid = user_auth(request.COOKIES.get("user_token"))
     except:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
+    page = request.GET.get("page", 1)
+    order = request.GET.get("order", "-date_published")
     if request.method == 'GET':
         event = Event.objects.all().order_by(order)
         serializer = PrivateEventSerializer(event, many=True)
